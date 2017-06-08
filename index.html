@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>yumini-select</title>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <style>
+    #resultBox {
+        position: absolute;
+        background-color: white;
+        width: 218px;
+        border: 1px solid #ccc;
+        display: none;
+        height: 260px;
+        overflow-x: hidden;
+    }
+    
+    #resultBox ul {
+        margin: 0px;
+        list-style-type: none;
+    }
+    
+    #resultBox ul li {
+        cursor: context-menu;
+        padding: 2px 5px;
+    }
+    
+    #resultBox ul li:hover {
+        background-color: #2fa4e3;
+        color: white;
+    }
+    </style>
+</head>
+
+<body>
+    <div style="position: relative;">
+        <input type="text" id="yuminiSelect">
+    </div>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        //***********************************************************************
+        //所有的事件监听在此
+        $("#yuminiSelect").on("input", function() {
+            searchBox();
+        });
+        //选择
+        $(document).on("click", ".searchBoxLi", function() {
+                console.log($(this).html());
+                $("#yuminiSelect").val($(this).find(".nameList").text());
+                $("#toSubBank").val($(this).find(".nameList").text());
+                $("#lineNumber").val($(this).find(".lineNumberLi").val())
+
+            })
+            //失去焦点后执行
+        $("#yuminiSelect").blur(function() {
+            /* $( document ).on( "click", ".searchBoxLi",function(){
+            	console.log($(this).html());
+            	var value=$(this).html();
+            	alert(value);
+            	$("#memberId").val(value);
+            }); */
+            var setTime = setTimeout(function() {
+                $("#resultBox").hide();
+            }, 200);
+
+        });
+        $("#yuminiSelect").focus(function() {
+            searchBox();
+        });
+        //************************************************************
+        //先写一个函数
+        function insertAfter(newElement,targetElement){
+        	var parent = targetElement.parentNode;
+        	if (parent.lastChild == targetElement) {
+        		parent.appendChild(newElement);
+        	}else{
+        		parent.insertBefore(newElement,targetElement.nextSibling);
+        	}
+        }
+        //初始化resultBox节点
+        var resultBox=document.createElement("div");
+        resultBox.setAttribute("id","resultBox");
+        var resultBoxUl=document.createElement("ul");
+        resultBox.appendChild(resultBoxUl);
+        console.log(resultBox);
+        var yuminiSelect = document.getElementById("yuminiSelect");
+        insertAfter(resultBox,yuminiSelect);
+        //************************************************************
+        //列表渲染函数
+        function searchBox() {
+            var yuminiSelect = $("#yuminiSelect").val();
+            var bankName = "广州银行";
+            var searchKey = $("#yuminiSelect").val();
+            $.ajax({
+                url: 'http://192.168.10.10:8080/tran/yunfax-accountsys-client/a/financeAdjustment/getBankLineno',
+                type: 'POST',
+                data: {
+                    bankName: bankName,
+                    searchKey: searchKey
+                },
+                /* cache: false,
+                processData: false,
+                contentType: false, */
+            }).done(function(res) {
+                if (res.bankLinenos) {
+                    $("#resultBox").show();
+                } else {
+                    return
+                }
+
+                var lists = "";
+                res.bankLinenos.forEach(function(e) {
+                    lists += "<li class='searchBoxLi'>" +
+                        /* "<input id='id1' name='id1' class='id1'  autocomplete='off' value="+e.memberId+" type='hidden'>"
+                        +
+                        "<input id='id2' name='id2' class='id2'  autocomplete='off' value="+e.memberName+" type='hidden'>"
+                        +"<div class='name1'>"+ 
+                        e.memberName
+                        +"<div>"  */
+                        "<input class='lineNumberLi'  autocomplete='off' value=" + e.lineNo + " type='hidden'>" + "<div class='nameList'>" +
+                        e.fullName + "<div>" + "</li>"
+                });
+                $("#resultBox ul").html(lists);
+                /* $("#lineNo").val(resData[0].lineNo); */
+            });
+        }
+    })
+    </script>
+</body>
+
+</html>
