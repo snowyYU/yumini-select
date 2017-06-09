@@ -86,6 +86,8 @@
         console.log(resultBox);
         var yuminiSelect = document.getElementById("yuminiSelect");
         insertAfter(resultBox,yuminiSelect);
+        //初始化resultBox的宽度等于input的宽度
+        resultBox.clientWidth=yuminiSelect.clientWidth;
         //************************************************************
         //列表渲染函数
         function searchBox() {
